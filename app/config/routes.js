@@ -51,14 +51,14 @@ function getAction(routeItem) {
 
 
 function registerRoute(application, controller, route, method, action) {
-  console.log(`Register route: ${method} ${route}`);
+  log.verbose(`Register route: ${method} ${route}`);
   application.route(route)[method]((req, res, next) => {
     controller[action](req, res, next);
   });
 }
 
 function registerRoutes(application, config) {
-  console.log('Binding routes...');
+  log.info('Binding routes...');
   for (let i = 0, length = config.length; i < length; i++) {
     const routeItem = config[i];
     const controller = loadController(routeItem);

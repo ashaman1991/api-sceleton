@@ -4,16 +4,21 @@ const passport = require('./passport');
 const routeConfig = require('./routes');
 const mongoose = require('mongoose');
 const ejwt = require('express-jwt');
+const winston = require('winston');
 const errors = require('./error');
 const path = require('path');
 const http = require('http');
 const _ = require('lodash');
 const fs = require('fs');
-
 /**
  * Custom server responses
  */
 const responses = require('../responses');
+
+function configureLogger(config) {
+  const logger = new winston.Logger(config);
+  global.log = logger;
+}
 
 function injectResponses(req, res, next) {
   Object.keys(responses).forEach((key) => {
@@ -60,12 +65,22 @@ function requireAuth() {
   return middleware;
 }
 
+function requestLogger(req, res, next) {
+  log.debug('Request:', {
+    method: req.method,
+    url: req.path,
+    data: { body: req.body, query: req.query },
+    status: res.statusCode,
+    isRequest: true
+  });
+  next();
+}
+
 /**
  * Add and configure Express middleware
  */
 function configureMiddleware(application, config) {
   application.use(bodyParser.json());
-
   application.use(injectResponses);
   application.use((req, res, next) => {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -75,6 +90,7 @@ function configureMiddleware(application, config) {
     next();
   });
   application.use(passport);
+  application.use(requestLogger);
   application.use(configureJwtAuth(config));
   application.use(requireAuth().unless({ path: ['/v1/signin', '/v1/signup'] }));
   routeConfig.registerRoutes(application, config.routes);
@@ -97,7 +113,7 @@ function configureDb(settings) {
       models.forEach((modelFile) => {
         // eslint-disable-next-line import/no-dynamic-require, global-require
         const model = require(path.join(modelPath, modelFile));
-        console.log(`Register model: ${model.modelName}`);
+        log.info(`Register model: ${model.modelName}`);
         global[model.modelName] = model;
       });
       resolve(db);
@@ -108,7 +124,7 @@ function configureDb(settings) {
 function startServer(application, config) {
   const server = http.createServer(application);
   server.listen(config.port, config.hostName, config.queueLength, () => {
-    console.log('listening at http://%s:%s', config.hostName, config.port);
+    log.info('listening at http://%s:%s', config.hostName, config.port);
   });
 }
 
@@ -116,6 +132,8 @@ function startServer(application, config) {
  * Configure setver instance
  */
 function configureWorker(application, config) {
+  // configure logging
+  configureLogger(config.logger);
   // configure database connection
   return configureDb(config.mongo)
     .then(() => {

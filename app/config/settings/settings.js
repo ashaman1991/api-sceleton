@@ -1,13 +1,14 @@
 /* eslint-disable import/no-dynamic-require, global-require */
 const os = require('os');
 const routes = require('./routes.config');
+const _ = require('lodash');
 
 const configLocation = './config.main';
 
 function createArgumentSettings(settings) {
   settings.environment = process.env.NODE_ENV || 'dev';
   settings.hostName = '127.0.0.1'; // is this needed?
-  settings.port = 3000;
+  settings.port = 3000; // TODO: get this value from somewhere
   return settings;
 }
 
@@ -28,7 +29,7 @@ function loadEnvironmentConfigFile(settings) {
 function loadConfigSettings(settings) {
   const envConfig = loadEnvironmentConfigFile(settings);
   const mainConfig = require(configLocation);
-  settings = Object.assign({}, settings, mainConfig, envConfig);
+  settings = _.merge({}, settings, mainConfig, envConfig);
   return settings;
 }
 

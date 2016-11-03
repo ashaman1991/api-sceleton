@@ -14,7 +14,8 @@
     "ApiError": true,
     "settings": true,
     "assert": true,
-    "User": true
+    "User": true,
+    "log": true
   },
   "env": {
     "node": true,
