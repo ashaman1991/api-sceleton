@@ -1,9 +1,12 @@
-node_modules/
-coverage/
+Dockerfile
+.gitignore
 npm-debug.log
+
+coverage/
+node_modules/
+
 *.opts
 *.log
 *.json
-Dockerfile
-docker-compose.yml
-.gitignore
+*.yml
+*.md

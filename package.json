@@ -4,8 +4,7 @@
   "description": "REST API template built with Express",
   "main": "app.js",
   "scripts": {
-    "test": "mocha",
-    "test-coverage": "eslint './**' --quiet && istanbul cover node_modules/mocha/bin/_mocha",
+    "test": "eslint './**' --quiet && istanbul cover node_modules/mocha/bin/_mocha",
     "start": "node app.js"
   },
   "repository": {
