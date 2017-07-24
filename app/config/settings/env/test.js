@@ -1,6 +1,6 @@
 module.exports = {
   mongo: {
-    url: 'mongodb://localhost:27017/liftsync-test',
+    url: 'mongodb://192.168.99.100:27017/test',
     modelPath: '../models'
   },
   logger: {

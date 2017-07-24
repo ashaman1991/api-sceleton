@@ -1,3 +1,6 @@
+/**
+ * API Routes and corresponding actions
+ */
 module.exports = [
   {
     route: '/v1/user/',

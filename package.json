@@ -4,7 +4,8 @@
   "description": "REST API template built with Express",
   "main": "app.js",
   "scripts": {
-    "test": "eslint './**' --quiet && istanbul cover node_modules/mocha/bin/_mocha",
+    "test": "eslint ./** --quiet && istanbul cover node_modules/mocha/bin/_mocha",
+    "fix-lint": "eslint ./** --fix",
     "start": "node app.js"
   },
   "repository": {
@@ -31,7 +32,7 @@
     "mocha": "^3.1.2",
     "mongodb": "^2.2.11",
     "sinon": "^1.17.6",
-    "supertest-as-promised": "^4.0.1"
+    "supertest": "^3.0.0"
   },
   "dependencies": {
     "bcrypt": "^0.8.7",
@@ -44,7 +45,7 @@
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.16.6",
     "moment": "^2.15.2",
-    "mongoose": "^4.6.4",
+    "mongoose": "^4.11.4",
     "passport": "^0.3.2",
     "passport-jwt": "^2.1.0",
     "passport-local": "^1.0.0",

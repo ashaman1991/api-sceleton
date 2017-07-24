@@ -10,6 +10,7 @@ const path = require('path');
 const http = require('http');
 const _ = require('lodash');
 const fs = require('fs');
+
 /**
  * Custom server responses
  */
@@ -21,14 +22,17 @@ function configureLogger(config) {
 }
 
 function injectResponses(req, res, next) {
-  Object.keys(responses).forEach((key) => {
+  Object.keys(responses).forEach(key => {
     res[key] = responses[key];
   });
   next();
 }
 
 function getToken(req) {
-  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.split(' ')[0] === 'Bearer'
+  ) {
     return req.headers.authorization.split(' ')[1];
   }
   return null;
@@ -43,21 +47,18 @@ function configureJwtAuth(config) {
     credentialsRequired: true,
     userProperty: 'jwtPayload',
     getToken
-  })
-    .unless({ path: ['/v1/signin', '/v1/signup'] });
+  }).unless({ path: ['/v1/signin', '/v1/signup'] }); // routes with no auth
 }
 
 function requireAuth() {
   const middleware = (req, res, next) => {
     const id = req.jwtPayload.id;
     if (id) {
-      return User
-        .findOne({ _id: id })
-        .then((user) => {
-          if (!user) return res.status(401).send();
-          req.user = user;
-          return next();
-        });
+      return User.findOne({ _id: id }).then(user => {
+        if (!user) return res.status(401).send();
+        req.user = user;
+        return next();
+      });
     }
     return res.status(401).send();
   };
@@ -103,22 +104,20 @@ function configureMiddleware(application, config) {
 function configureDb(settings) {
   mongoose.Promise = global.Promise;
 
-  return new Promise((resolve, reject) => {
-    mongoose.connect(settings.url);
-    const db = mongoose.connection;
-    db.on('error', reject);
-    db.once('open', () => {
+  return mongoose
+    .connect(settings.url, {
+      useMongoClient: true
+    })
+    .then(() => {
       const modelPath = path.join(__dirname, settings.modelPath);
       const models = fs.readdirSync(modelPath);
-      models.forEach((modelFile) => {
+      models.forEach(modelFile => {
         // eslint-disable-next-line import/no-dynamic-require, global-require
         const model = require(path.join(modelPath, modelFile));
         log.info(`Register model: ${model.modelName}`);
         global[model.modelName] = model;
       });
-      resolve(db);
     });
-  });
 }
 
 function startServer(application, config) {
@@ -135,16 +134,15 @@ function configureWorker(application, config) {
   // configure logging
   configureLogger(config.logger);
   // configure database connection
-  return configureDb(config.mongo)
-    .then(() => {
-      // configure server
-      configureMiddleware(application, config);
-      // configure routes
-      global._ = _;
-      global.ApiError = errors.ApiError;
-      startServer(application, config);
-      return application;
-    });
+  return configureDb(config.mongo).then(() => {
+    // configure server
+    configureMiddleware(application, config);
+    // configure routes
+    global._ = _;
+    global.ApiError = errors.ApiError;
+    startServer(application, config);
+    return application;
+  });
 }
 
 module.exports = {

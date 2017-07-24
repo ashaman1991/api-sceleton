@@ -1,7 +1,6 @@
 /* eslint-disable import/no-dynamic-require, global-require */
 const os = require('os');
 const routes = require('./routes.config');
-const _ = require('lodash');
 
 const configLocation = './config.main';
 
@@ -29,7 +28,7 @@ function loadEnvironmentConfigFile(settings) {
 function loadConfigSettings(settings) {
   const envConfig = loadEnvironmentConfigFile(settings);
   const mainConfig = require(configLocation);
-  settings = _.merge({}, settings, mainConfig, envConfig);
+  settings = Object.assign({}, settings, mainConfig, envConfig);
   return settings;
 }
 

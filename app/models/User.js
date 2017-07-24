@@ -9,21 +9,24 @@ function isHash(string) {
   return regex.test(string);
 }
 
-const userSchema = new mongoose.Schema({
-  username: { type: String, index: { unique: true } },
-  email: { type: String, index: { unique: true } },
-  password: String
-},
+const userSchema = new mongoose.Schema(
+  {
+    username: { type: String, index: { unique: true } },
+    email: { type: String, index: { unique: true } },
+    type: { type: String, enum: ['admin', 'user'], default: 'user' },
+    password: String
+  },
   {
     collection: 'user'
-  });
+  }
+);
 
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function(next) {
   this.password = bcrypt.hashSync(this.password, 5);
   next();
 });
 
-userSchema.pre('update', function (next) {
+userSchema.pre('update', function(next) {
   // just to be sure, but this should not be an issue
   if (this.password) {
     if (isHash(this.password)) {
