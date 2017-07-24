@@ -10,6 +10,7 @@ const path = require('path');
 const http = require('http');
 const _ = require('lodash');
 const fs = require('fs');
+const Acl = require('resourceful-acl');
 
 /**
  * Custom server responses
@@ -19,6 +20,16 @@ const responses = require('../responses');
 function configureLogger(config) {
   const logger = new winston.Logger(config);
   global.log = logger;
+}
+
+/**
+ * Configure ACL service
+ */
+function configureAcl(config) {
+  const options = config.acl.options;
+  const accessList = config.acl.accessList;
+
+  return new Acl(options, accessList);
 }
 
 function injectResponses(req, res, next) {
@@ -94,6 +105,7 @@ function configureMiddleware(application, config) {
   application.use(requestLogger);
   application.use(configureJwtAuth(config));
   application.use(requireAuth().unless({ path: ['/v1/signin', '/v1/signup'] }));
+  application.use(configureAcl(config).authorize());
   routeConfig.registerRoutes(application, config.routes);
   application.use(errors.handler);
 }

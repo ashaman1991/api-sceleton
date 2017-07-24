@@ -1,5 +1,6 @@
 /* eslint-disable import/no-dynamic-require, global-require */
 const os = require('os');
+const acl = require('./acl.config');
 const routes = require('./routes.config');
 
 const configLocation = './config.main';
@@ -18,7 +19,9 @@ function loadEnvironmentConfigFile(settings) {
   try {
     config = require(envConfigLocation);
   } catch (e) {
-    console.error(`Unable to parse "config/settings/" ${envConfigLocation} ${e}`);
+    console.error(
+      `Unable to parse "config/settings/" ${envConfigLocation} ${e}`
+    );
     config = {};
   }
 
@@ -43,11 +46,17 @@ function loadRouteSettings(settings) {
   return settings;
 }
 
+function loadAclSettings(settings) {
+  settings.acl = acl;
+  return settings;
+}
+
 function initializeSettings() {
   let settings = {};
   settings = createArgumentSettings(settings);
   settings = loadConfigSettings(settings);
   settings = loadServerSettings(settings);
+  settings = loadAclSettings(settings);
   settings = loadRouteSettings(settings);
   global.settings = settings;
   return settings;
